@@ -1,0 +1,5 @@
+Name: Fiker, ID: 1010, Department: Software
+Name: Belete, ID: 2020, Department: Math
+Name: Abebeb, ID: 9090, Department: Physics
+Name: Ponziani, ID: 123312, Department: Chess
+Name: Caro K, ID: 123123, Department: Chess.com

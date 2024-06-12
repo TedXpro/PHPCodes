@@ -1,0 +1,27 @@
+.info {
+    display: block;
+    width: 500px;
+}
+
+.errorMessage{
+    display: inline;
+    color: red;
+}
+
+#colorInput {
+    display: block;
+}
+
+#dateInput {
+    display: block;
+}
+
+select {
+    display: block;
+}
+
+textarea {
+    display: block;
+    width: 500px;
+    height: 120px;
+}

@@ -1,0 +1,134 @@
+*{
+  font-family: inter;
+}
+
+.bodyClass{
+  background-color: rgba(231, 231, 204, 0.795);
+  width: 70%;
+  padding: 20px;
+  justify-content: center;
+  position: relative;
+  left: 190px;
+}
+
+a{
+  text-decoration: none;
+}
+
+header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.image-container img{
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+}
+nav ul{
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+nav ul li{
+  color: black;
+  background-color: white;
+  padding: 0.5em 1em;
+  border-radius: 10px;
+}
+input{
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
+  border: 1px solid black;
+}
+button {
+  padding: 0.5rem 1rem;
+  background: rgb(124, 127, 125);
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 10px;
+}
+hr{
+  margin-top: 1rem;
+  border-top: 1px dashed black;
+}
+
+main{
+  display: flex;
+  justify-content: space-between;
+  /* align-items: center; */
+  margin-top: 2rem;
+}
+.sidebar1{
+  background-color: rgb(195, 195, 118);
+  padding: 1rem;
+  width: 200px;
+  border-radius: 10px;
+}
+
+.sidebar1 div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background-color: rgb(255, 255, 255);
+  margin-bottom: 1rem;
+  border-radius: 10px;
+}
+.sidebar1 div:last-child{
+  margin-bottom: 0;
+}
+
+.sidebar2{
+  background-color: rgb(195, 195, 118);
+  padding: 1rem;
+  width: 200px;
+  border-radius: 10px;
+}
+
+.sidebar2 div{
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  background-color: rgb(255, 255, 255);
+  margin-bottom: 1rem;
+  border-radius: 10px;
+}
+
+.related-article-section{
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.title{
+  text-decoration: underline;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 0px;
+  margin-bottom: 2px;
+}
+
+.description{
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+.main-content{
+  width: 600px;
+  padding: 0rem 1rem;
+}
+.main-content h1{
+  margin-top: 0px;
+}
+
+footer{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}

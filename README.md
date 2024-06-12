@@ -1,0 +1,1 @@
+This repository holds codes done while studying web application and development
