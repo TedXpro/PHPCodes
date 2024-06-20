@@ -48,18 +48,18 @@ if (isset($_POST['customerSubmitButton'])) {
 
 
       // Move uploaded file
-      if (move_uploaded_file($fileTmpName, $uploadDir)) {
-        echo "File uploaded successfully!";
-      }
 
 
-      $sql = "INSERT INTO customer (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, `Phone Number`, `Photo Link`, Email) 
-            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$phone', '$uploadDir', '$email');";
+      $sql = "INSERT INTO customer (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, `Phone Number`, DOB, `Photo Link`, Email) 
+            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$phone', '$dob', '$uploadDir', '$email');";
 
       $credentialsSql = "INSERT INTO customer_credentials (UserName, PassHash) VALUES ('$username', '$password');";
 
       if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
         echo "SUCCESS";
+        if (move_uploaded_file($fileTmpName, $uploadDir)) {
+          echo "File uploaded successfully!";
+        }
         // header("location: index.php");
       } else {
         echo 'query error ' . mysqli_error($conn);
@@ -79,7 +79,6 @@ if (isset($_POST['customerSubmitButton'])) {
   $email = htmlspecialchars($_POST['techEmail']);
   $password = htmlspecialchars($_POST['techPassword']);
   $confirmPassword = htmlspecialchars($_POST['techConfirmPassword']);
-  // $pic = htmlspecialchars($_POST['']); 
   $phone = htmlspecialchars($_POST['techPhone']);
   $eduLevel = htmlspecialchars($_POST['techEducationLevel']);
   $skills = htmlspecialchars($_POST['techSkills']);
@@ -94,7 +93,7 @@ if (isset($_POST['customerSubmitButton'])) {
   $sql = "SELECT UserName from technician WHERE UserName = '$username'";
   $result = mysqli_query($conn, $sql);
   $resultArray = mysqli_fetch_assoc($result);
-  if ($resultArray['UserName'] != "") {
+  if ($resultArray) {
     $errors['username'] = "Username already exists!";
   } else if ($password !== $confirmPassword) {  // check password
     $errors['password'] = "Passwords don't match!";
@@ -102,17 +101,73 @@ if (isset($_POST['customerSubmitButton'])) {
   } else {
     $password = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO technician (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, `Phone Number`, Email, `Work Address`, Bio) 
-            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$phone', '$email', '$location', '$bio' );";
+    // upload files
+    if (
+      isset($_FILES['techCertificate']) && $_FILES['techCertificate']['error'] === UPLOAD_ERR_OK
+      && isset($_FILES['techProfilePicture']) && $_FILES['techProfilePicture']['error'] === UPLOAD_ERR_OK
+      && isset($_FILES['techPassport']) && $_FILES['techPassport']['error'] === UPLOAD_ERR_OK
+    ) {
 
-    $credentialsSql = "INSERT INTO technician_credentials (UserName, PassHash) VALUES ('$username', '$password');";
+      // READY Certificate
+      $certiFileName = $_FILES['techCertificate']['name'];  // Original filename
+      $certiFileTmpName = $_FILES['techCertificate']['tmp_name'];
+      $certiFileSize = $_FILES['techCertificate']['size'];
+      $certiFileType = $_FILES['techCertificate']['type'];
+
+      // Generate a unique filename with extension
+      $certiUniqueFileName = $username . "_Certificate" . '.' . pathinfo($certiFileName, PATHINFO_EXTENSION);
+
+      // Define upload directory with subfolder
+      $certiUploadDir = "TechnicianCertificates/" . $certiUniqueFileName;
+
+      // READY profile pic
+      $profileFileName = $_FILES['techProfilePicture']['name'];  // Original filename
+      $profileFileTmpName = $_FILES['techProfilePicture']['tmp_name'];
+      $profileFileSize = $_FILES['techProfilePicture']['size'];
+      $profileFileType = $_FILES['techProfilePicture']['type'];
+
+      // Generate a unique filename with extension
+      $uniqueFileName = $username . "_ProfilePic" . '.' . pathinfo($profileFileName, PATHINFO_EXTENSION);
+
+      // Define upload directory with subfolder
+      $profileUploadDir = "TechnicianProfilePics/" . $uniqueFileName;
+
+      // READY Passport
+      $passportFileName = $_FILES['techPassport']['name'];  // Original filename
+      $passportFileTmpName = $_FILES['techPassport']['tmp_name'];
+      $passportFileSize = $_FILES['techPassport']['size'];
+      $passportFileType = $_FILES['techPassport']['type'];
+
+      // Generate a unique filename with extension
+      $uniqueFileName = $username . "_Passport" . '.' . pathinfo($passportFileName, PATHINFO_EXTENSION);
+
+      // Define upload directory with subfolder
+      $passportUploadDir = "TechnicianResidentialID/" . $uniqueFileName;
 
 
-    if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
-      echo "SUCCESS";
-      // header("location: index.php");
-    } else {
-      echo 'query error ' . mysqli_error($conn);
+
+      $sql = "INSERT INTO technician (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, DOB, `Phone Number`, Email, `Work Address`, Photo, `Identifier Link`,  Bio) 
+            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$dob', '$phone', '$email', '$location', '$profileUploadDir', '$passportUploadDir', '$bio' );";
+
+      $credentialsSql = "INSERT INTO technician_credentials (UserName, PassHash) VALUES ('$username', '$password');";
+
+
+      if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
+        echo "SUCCESS";
+        if (move_uploaded_file($certiFileTmpName, $certiUploadDir)) { // upload certificate
+          echo "Certificate uploaded successfully!";
+        }
+        if (move_uploaded_file($passportFileTmpName, $passportUploadDir)) { // upload passport
+          echo "Passport uploaded successfully!";
+        }
+        if (move_uploaded_file($profileFileTmpName, $profileUploadDir)) { // upload Profile pic
+          echo "Profile Pic uploaded successfully!";
+        }
+
+        // header("location: index.php");
+      } else {
+        echo 'query error ' . mysqli_error($conn);
+      }
     }
   }
 }
@@ -159,15 +214,15 @@ if (isset($_POST['customerSubmitButton'])) {
         <div class="signup-form">
           <h3>Customer Sign Up</h3>
           <div class="input-box">
-            <input type="text" id="customer-fName" name="custFirstName" placeholder="First Name" value="<?php echo isset($_POST['custFirstName']) ? htmlspecialchars($_POST['custFirstName']) : ""; ?>" />
+            <input type="text" id="customer-fName" name="custFirstName" placeholder="First Name" required value="<?php echo isset($_POST['custFirstName']) ? htmlspecialchars($_POST['custFirstName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="text" id="customer-lName" name="custMName" placeholder="Middle Name" value="<?php echo isset($_POST['custMName']) ? htmlspecialchars($_POST['custMName']) : ""; ?>" />
+            <input type="text" id="customer-lName" name="custMName" placeholder="Middle Name" required value="<?php echo isset($_POST['custMName']) ? htmlspecialchars($_POST['custMName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="text" id="customer-gName" name="custLastName" placeholder="Last Name" value="<?php echo isset($_POST['custLastName']) ? htmlspecialchars($_POST['custLastName']) : ""; ?>" />
+            <input type="text" id="customer-gName" name="custLastName" placeholder="Last Name" required value="<?php echo isset($_POST['custLastName']) ? htmlspecialchars($_POST['custLastName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
 
@@ -175,12 +230,12 @@ if (isset($_POST['customerSubmitButton'])) {
             <label class="errors">
               <?php echo $errors['username']; ?>
             </label>
-            <input type="text" id="technician-fullName" name="custUsername" placeholder="User Name" value="<?php echo isset($_POST['custUsername']) ? htmlspecialchars($_POST['custUsername']) : ""; ?>" />
+            <input type="text" id="technician-fullName" name="custUsername" placeholder="User Name" required value="<?php echo isset($_POST['custUsername']) ? htmlspecialchars($_POST['custUsername']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
 
           <div class="input-box">
-            <input type="number" id="technician-age" name="age" placeholder="Age" value="<?php echo isset($_POST['age']) ? htmlspecialchars($_POST['age']) : ""; ?>" />
+            <input type="date" id="technician-age" name="age" placeholder="Age" required value="<?php echo isset($_POST['age']) ? htmlspecialchars($_POST['age']) : ""; ?>" />
             <i class='bx bxs-calendar'></i>
           </div>
 
@@ -194,28 +249,28 @@ if (isset($_POST['customerSubmitButton'])) {
             </label>
           </div>
           <div class="input-box">
-            <input type="email" id="customer-email" name="custEmail" placeholder="Email" value="<?php echo isset($_POST['custEmail']) ? htmlspecialchars($_POST['custEmail']) : ""; ?>" />
+            <input type="email" id="customer-email" name="custEmail" placeholder="Email" required value="<?php echo isset($_POST['custEmail']) ? htmlspecialchars($_POST['custEmail']) : ""; ?>" />
             <i class='bx bxs-envelope'></i>
           </div>
           <div class="input-box">
             <label class="errors">
               <?php echo $errors['password']; ?>
             </label>
-            <input type="password" id="customer-password" name="custPassword" placeholder="Password" />
+            <input type="password" id="customer-password" name="custPassword" placeholder="Password" required />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
-            <input type="password" id="customer-confirm-password" name="custConfirmPassword" placeholder="Confirm Password" />
+            <input type="password" id="customer-confirm-password" name="custConfirmPassword" placeholder="Confirm Password" required />
             <i class='bx bxs-lock-alt'></i>
           </div>
 
           <div class="input-box">
-            <input type="tel" id="customer-phone" name="custPhone" placeholder="Phone" value="<?php echo isset($_POST['custPhone']) ? htmlspecialchars($_POST['custPhone']) : ""; ?>" />
+            <input type="tel" id="customer-phone" name="custPhone" placeholder="Phone" required value="<?php echo isset($_POST['custPhone']) ? htmlspecialchars($_POST['custPhone']) : ""; ?>" />
             <i class='bx bxs-phone'></i>
           </div>
           <div class="file-box">
             <label for="customer-profilePicture">Upload Profile Picture (4x3)</label>
-            <input type="file" id="customer-profilePicture" name="custProfilePicture" accept="image/png, image/jpeg" />
+            <input type="file" id="customer-profilePicture" name="custProfilePicture" accept="image/png, image/jpeg" required />
           </div>
         </div>
         <button type="submit" id="signup" name="customerSubmitButton">Sign Up</button>
@@ -229,22 +284,22 @@ if (isset($_POST['customerSubmitButton'])) {
         <div class="signup-form">
           <h3>Technician Sign Up</h3>
           <div class="input-box">
-            <input type="text" id="technician-fullName" name="techFirstName" placeholder="Full Name" value="<?php echo isset($_POST['techFirstName']) ? htmlspecialchars($_POST['techFirstName']) : ""; ?>" />
+            <input type="text" id="technician-fullName" name="techFirstName" placeholder="First Name" required value="<?php echo isset($_POST['techFirstName']) ? htmlspecialchars($_POST['techFirstName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="text" id="technician-lName" name="techMName" placeholder="last Name" value="<?php echo isset($_POST['techMName']) ? htmlspecialchars($_POST['techMName']) : ""; ?>" />
+            <input type="text" id="technician-lName" name="techMName" placeholder="Middle Name" required value="<?php echo isset($_POST['techMName']) ? htmlspecialchars($_POST['techMName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="text" id="technician-gName" name="techLName" placeholder="Grand father Name" value="<?php echo isset($_POST['techLName']) ? htmlspecialchars($_POST['techLName']) : ""; ?>" />
+            <input type="text" id="technician-gName" name="techLName" placeholder="Last Name" required value="<?php echo isset($_POST['techLName']) ? htmlspecialchars($_POST['techLName']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
             <label class="errors">
               <?php echo $errors['username']; ?>
             </label>
-            <input type="text" id="technician-fullName" name="techUsername" placeholder="User Name" value="<?php echo isset($_POST['techUsername']) ? htmlspecialchars($_POST['techUsername']) : ""; ?>" />
+            <input type="text" id="technician-fullName" name="techUsername" placeholder="Username" required value="<?php echo isset($_POST['techUsername']) ? htmlspecialchars($_POST['techUsername']) : ""; ?>" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="gender-options">
@@ -257,26 +312,26 @@ if (isset($_POST['customerSubmitButton'])) {
             </label>
           </div>
           <div class="input-box">
-            <input type="number" id="technician-age" name="techAge" placeholder="Age" value="<?php echo isset($_POST['techAge']) ? htmlspecialchars($_POST['techAge']) : ""; ?>" />
+            <input type="date" id="technician-age" name="techAge" placeholder="Age" required value="<?php echo isset($_POST['techAge']) ? htmlspecialchars($_POST['techAge']) : ""; ?>" />
             <i class='bx bxs-calendar'></i>
           </div>
           <div class="input-box">
-            <input type="email" id="technician-email" name="techEmail" placeholder="Email" value="<?php echo isset($_POST['techEmail']) ? htmlspecialchars($_POST['techEmail']) : ""; ?>" />
+            <input type="email" id="technician-email" name="techEmail" placeholder="Email" required value="<?php echo isset($_POST['techEmail']) ? htmlspecialchars($_POST['techEmail']) : ""; ?>" />
             <i class='bx bxs-envelope'></i>
           </div>
           <div class="input-box">
             <label class="errors">
               <?php echo $errors['password']; ?>
             </label>
-            <input type="password" id="technician-password" name="techPassword" placeholder="Password" />
+            <input type="password" id="technician-password" name="techPassword" placeholder="Password" required />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
-            <input type="password" id="technician-confirm-password" name="techConfirmPassword" placeholder="Confirm Password" />
+            <input type="password" id="technician-confirm-password" name="techConfirmPassword" placeholder="Confirm Password" required />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
-            <input type="tel" id="technician-phone" name="techPhone" placeholder="Phone" value="<?php echo isset($_POST['techPhone']) ? htmlspecialchars($_POST['techPhone']) : ""; ?>" />
+            <input type="tel" id="technician-phone" name="techPhone" placeholder="Phone" required value="<?php echo isset($_POST['techPhone']) ? htmlspecialchars($_POST['techPhone']) : ""; ?>" />
             <i class='bx bxs-phone'></i>
           </div>
 
@@ -300,43 +355,43 @@ if (isset($_POST['customerSubmitButton'])) {
             <div class="Skill">
 
               <select type="text" id="technician-skills" name="techSkills" placeholder="Skills" value="<?php echo isset($_POST['custFirstName']) ? htmlspecialchars($_POST['custFirstName']) : ""; ?>">
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == '') ? 'selected' : '' ?> value="" disabled selected>Select Skills</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Carpentry') ? 'selected' : '' ?> value="Carpentry">Carpentry</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Plumbing') ? 'selected' : '' ?> value="Plumbing">Plumbing</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Electrical') ? 'selected' : '' ?> value="Electrical">Electrical</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'HVAC Technician') ? 'selected' : '' ?> value="HVAC Technician">HVAC Technician</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Painting') ? 'selected' : '' ?> value="Painting">Painting</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Dish Network technician') ? 'selected' : '' ?> value="Dish Network technician">Dish Network technician</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Masonry') ? 'selected' : '' ?> value="Masonry">Masonry</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Cementing') ? 'selected' : '' ?> value="Cementing">Cementing</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Pest Control') ? 'selected' : '' ?> value="Pest Control">Pest Control</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Other') ? 'selected' : '' ?> value="Other">Other</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == '') ? 'selected' : '' ?> required value="" disabled selected>Select Skills</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Carpentry') ? 'selected' : '' ?> required value="Carpentry">Carpentry</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Plumbing') ? 'selected' : '' ?> required value="Plumbing">Plumbing</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Electrical') ? 'selected' : '' ?> required value="Electrical">Electrical</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'HVAC Technician') ? 'selected' : '' ?> required value="HVAC Technician">HVAC Technician</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Painting') ? 'selected' : '' ?> required value="Painting">Painting</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Dish Network technician') ? 'selected' : '' ?> required value="Dish Network technician">Dish Network technician</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Masonry') ? 'selected' : '' ?> required value="Masonry">Masonry</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Cementing') ? 'selected' : '' ?> required value="Cementing">Cementing</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Pest Control') ? 'selected' : '' ?> required value="Pest Control">Pest Control</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Other') ? 'selected' : '' ?> required value="Other">Other</option>
               </select>
             </div>
           </div>
           <div class="input-box">
-            <input type="number" id="technician-experience" name="techExperience" placeholder="Experience" value="<?php echo isset($_POST['techExperience']) ? htmlspecialchars($_POST['techExperience']) : ""; ?>" />
+            <input type="number" id="technician-experience" name="techExperience" placeholder="Experience" required value="<?php echo isset($_POST['techExperience']) ? htmlspecialchars($_POST['techExperience']) : ""; ?>" />
             <i class='bx bx-briefcase'></i>
           </div>
           <div class="input-box">
-            <input type="text" id="technician-availableLocation" name="techAvailableLocation" placeholder="Available Location" value="<?php echo isset($_POST['techAvailableLocation']) ? htmlspecialchars($_POST['techAvailableLocation']) : ""; ?>" />
+            <input type="text" id="technician-availableLocation" name="techAvailableLocation" placeholder="Available Location" required value="<?php echo isset($_POST['techAvailableLocation']) ? htmlspecialchars($_POST['techAvailableLocation']) : ""; ?>" />
             <i class='bx bx-map'></i>
           </div>
           <div class="file-box">
             <div class="certificate">
               <label for="technician-certificate">Upload Education Certificate (PDF)</label>
-              <input type="file" id="technician-certificate" name="techCertificate" accept="application/pdf" />
+              <input type="file" id="technician-certificate" name="techCertificate" accept="application/pdf" required />
             </div>
           </div>
 
           <div class="file-box">
             <div class="profile">
               <label for="customer-profilePicture">Upload Profile Picture (4x3)</label>
-              <input type="file" id="customer-profilePicture" name="techProfilePicture" accept="image/png, image/jpeg" />
+              <input type="file" id="customer-profilePicture" name="techProfilePicture" accept="image/png, image/jpeg" required />
             </div>
             <div class="ID">
               <label for="technician-id">Upload ID/Passport (PDF)</label>
-              <input type="file" id="technician-certificate" name="techPassport" accept="application/pdf" />
+              <input type="file" id="technician-certificate" name="techPassport" accept="application/pdf" required />
             </div>
           </div>
           <textarea id="technician-additionalBio" name="techAdditionalBio" placeholder="Additional Bio" value="<?php echo isset($_POST['techAdditionalBio']) ? htmlspecialchars($_POST['techAdditionalBio']) : ""; ?>"></textarea>
@@ -345,8 +400,6 @@ if (isset($_POST['customerSubmitButton'])) {
         <button type="submit" id="signup" name="technicianSubmitButton">Sign Up</button>
 
       </div>
-
-
     </form>
 
     <div class="info-text">
