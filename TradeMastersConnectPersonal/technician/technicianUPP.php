@@ -117,12 +117,12 @@ if (isset($_POST['submit'])) {
           <i class='bx bxs-phone'></i>
         </div>
         <div class="input-box">
-          <label for="middleName">Username</label>
+          <label for="middleName">Middle Name</label>
           <input type="text" name="middleName" value="<?php echo isset($_POST['middleName']) ? htmlspecialchars($_POST['middleName']) : htmlspecialchars($result['Father Name']); ?>" />
           <i class='bx bxs-phone'></i>
         </div>
         <div class="input-box">
-          <label for="lastName">Username</label>
+          <label for="lastName">Last Name</label>
           <input type="text" name="lastName" value="<?php echo isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName']) : htmlspecialchars($result['Grand Father Name']); ?>" />
           <i class='bx bxs-phone'></i>
         </div>
