@@ -1,4 +1,7 @@
 <?php
+session_start();
+
+
 require("../configDB/configDatabase.php");
 $username = "";
 $password = "";
@@ -13,20 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     {
         global $conn, $username, $password, $error;
 
-        $sql = "select PassHash from customer_credentials where UserName = '$username'";
-        $result = $conn->query($sql);
-        $row = $result->fetch_assoc();
+        $sql = "SELECT PassHash FROM customer_credentials WHERE UserName = '$username'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_assoc($result);
 
         if (!$row) {
             $error = "Incorrect username or password";
         } else {
+            echo $row['PassHash'];
             $hashed = $row['PassHash'];
             if (!password_verify($password, $hashed)) {
                 $error = "Incorrect username or password";
             } else {
                 // $error = "Success";
-                session_start();
-
+                echo "Accepted";
                 $_SESSION['username'] = $username;
                 $_SESSION['role'] = 'customer';
                 header('Location: ../customer/home.php');
@@ -118,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn">Login</button>
 
             <div class="info-text">
-                <p>Don't have an account? <a href="signUp.html">Sign up here.</a></p>
+                <p>Don't have an account? <a href="signUp.php   ">Sign up here.</a></p>
                 <p>By logging in, you agree to our <a href="privacy.html">privacy statement.</a></p>
             </div>
         </form>

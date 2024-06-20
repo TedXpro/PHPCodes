@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require("../configDB/configDatabase.php"); // connect to db
 
 $errors = array('password' => '', 'username' => '');
@@ -56,11 +58,11 @@ if (isset($_POST['customerSubmitButton'])) {
       $credentialsSql = "INSERT INTO customer_credentials (UserName, PassHash) VALUES ('$username', '$password');";
 
       if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
-        echo "SUCCESS";
-        if (move_uploaded_file($fileTmpName, $uploadDir)) {
-          echo "File uploaded successfully!";
-        }
-        // header("location: index.php");
+        move_uploaded_file($fileTmpName, $uploadDir);
+
+        $_SESSION['username'] = $username;
+        $_SESSION['role'] = 'customer';
+        header('Location: ../customer/home.php');
       } else {
         echo 'query error ' . mysqli_error($conn);
       }
@@ -151,22 +153,17 @@ if (isset($_POST['customerSubmitButton'])) {
 
       $credentialsSql = "INSERT INTO technician_credentials (UserName, PassHash) VALUES ('$username', '$password');";
 
-      echo $skills;
       $techSkillSql = "INSERT INTO technician_skill (TechUserName, SkillTitle, Experience, Rating, CertificateLink) VALUES ('$username', '$skills', '$xp', '1', '$certiUploadDir');";
 
       if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql) && mysqli_query($conn, $techSkillSql)) {
-        echo "SUCCESS";
-        if (move_uploaded_file($certiFileTmpName, $certiUploadDir)) { // upload certificate
-          echo "Certificate uploaded successfully!";
-        }
-        if (move_uploaded_file($passportFileTmpName, $passportUploadDir)) { // upload passport
-          echo "Passport uploaded successfully!";
-        }
-        if (move_uploaded_file($profileFileTmpName, $profileUploadDir)) { // upload Profile pic
-          echo "Profile Pic uploaded successfully!";
-        }
+        move_uploaded_file($certiFileTmpName, $certiUploadDir); // upload certificate
+        move_uploaded_file($passportFileTmpName, $passportUploadDir); // upload passport
+        move_uploaded_file($profileFileTmpName, $profileUploadDir); // upload Profile pic
 
-        // header("location: index.php");
+        $_SESSION['username'] = $username;
+        $_SESSION['role'] = "technician";
+
+        header('Location: ../technician/home.php'); // redirect to technician home page
       } else {
         echo 'query error ' . mysqli_error($conn);
       }

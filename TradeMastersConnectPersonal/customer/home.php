@@ -2,7 +2,7 @@
 
     session_start();
 
-    if (!isset($_SESSION['username']) || $_SESSION['role'] != 'customer'){
+    if (!isset($_SESSION['username']) && $_SESSION['role'] != 'customer'){
         header('Location: ../prepages/login.php');
     }
 
