@@ -51,9 +51,9 @@ if (isset($_POST['customerSubmitButton'])) {
 
 
       $sql = "INSERT INTO customer (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, `Phone Number`, DOB, `Photo Link`, Email) 
-            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$phone', '$dob', '$uploadDir', '$email');";
+            required VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$phone', '$dob', '$uploadDir', '$email');";
 
-      $credentialsSql = "INSERT INTO customer_credentials (UserName, PassHash) VALUES ('$username', '$password');";
+      $credentialsSql = "INSERT INTO customer_credentials (UserName, PassHash) required VALUES ('$username', '$password');";
 
       if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
         echo "SUCCESS";
@@ -147,12 +147,14 @@ if (isset($_POST['customerSubmitButton'])) {
 
 
       $sql = "INSERT INTO technician (UserName, `First Name`, `Father Name`, `Grand Father Name`, Gender, DOB, `Phone Number`, Email, `Work Address`, Photo, `Identifier Link`,  Bio) 
-            VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$dob', '$phone', '$email', '$location', '$profileUploadDir', '$passportUploadDir', '$bio' );";
+            required VALUES ('$username', '$fname', '$mname', '$lname', '$gender', '$dob', '$phone', '$email', '$location', '$profileUploadDir', '$passportUploadDir', '$bio' );";
 
-      $credentialsSql = "INSERT INTO technician_credentials (UserName, PassHash) VALUES ('$username', '$password');";
+      $credentialsSql = "INSERT INTO technician_credentials (UserName, PassHash) required VALUES ('$username', '$password');";
 
+      echo $skills;
+      $techSkillSql = "INSERT INTO technician_skill (TechUserName, SkillTitle, Experience, Rating, CertificateLink) required VALUES ('$username', '$skills', '$xp', '1', '$certiUploadDir');";
 
-      if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql)) {
+      if (mysqli_query($conn, $sql) && mysqli_query($conn, $credentialsSql) && mysqli_query($conn, $techSkillSql)) {
         echo "SUCCESS";
         if (move_uploaded_file($certiFileTmpName, $certiUploadDir)) { // upload certificate
           echo "Certificate uploaded successfully!";
@@ -193,14 +195,14 @@ if (isset($_POST['customerSubmitButton'])) {
 
     <div class="signup-options">
       <div class="option">
-        <input type="radio" id="customer" name="user-type" value="customer" class="radio-btn" checked />
+        <input type="radio" id="customer" name="user-type" required value="customer" class="radio-btn" checked />
         <label for="customer">
           <h4>As Customer</h4>
           <i class='bx bx-user'></i>
         </label>
       </div>
       <div class="option">
-        <input type="radio" id="technician" name="user-type" value="technician" class="radio-btn" />
+        <input type="radio" id="technician" name="user-type" required value="technician" class="radio-btn" />
         <label for="technician">
           <h4>As Technician</h4>
           <i class='bx bxs-wrench'></i>
@@ -242,10 +244,10 @@ if (isset($_POST['customerSubmitButton'])) {
           <div class="gender-options">
             <p>Gender:</p>
             <label for="">
-              <input type="radio" id="technician-male" name="custGender" value="male" <?php echo isset($_POST['custGender']) && ($_POST['custGender'] == 'male') ? 'checked' : '' ?> />Male
+              <input type="radio" id="technician-male" name="custGender" required value="male" <?php echo isset($_POST['custGender']) && ($_POST['custGender'] == 'male') ? 'checked' : '' ?> />Male
             </label>
             <label for="">
-              <input type="radio" id="technician-female" name="custGender" value="female" <?php echo isset($_POST['custGender']) && ($_POST['custGender'] == 'female') ? 'checked' : '' ?> />Female
+              <input type="radio" id="technician-female" name="custGender" required value="female" <?php echo isset($_POST['custGender']) && ($_POST['custGender'] == 'female') ? 'checked' : '' ?> />Female
             </label>
           </div>
           <div class="input-box">
@@ -256,11 +258,11 @@ if (isset($_POST['customerSubmitButton'])) {
             <label class="errors">
               <?php echo $errors['password']; ?>
             </label>
-            <input type="password" id="customer-password" name="custPassword" placeholder="Password" required />
+            <input type="password" id="customer-password" name="custPassword" placeholder="Password" />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
-            <input type="password" id="customer-confirm-password" name="custConfirmPassword" placeholder="Confirm Password" required />
+            <input type="password" id="customer-confirm-password" name="custConfirmPassword" placeholder="Confirm Password" />
             <i class='bx bxs-lock-alt'></i>
           </div>
 
@@ -270,7 +272,7 @@ if (isset($_POST['customerSubmitButton'])) {
           </div>
           <div class="file-box">
             <label for="customer-profilePicture">Upload Profile Picture (4x3)</label>
-            <input type="file" id="customer-profilePicture" name="custProfilePicture" accept="image/png, image/jpeg" required />
+            <input type="file" id="customer-profilePicture" name="custProfilePicture" accept="image/png, image/jpeg" />
           </div>
         </div>
         <button type="submit" id="signup" name="customerSubmitButton">Sign Up</button>
@@ -305,10 +307,10 @@ if (isset($_POST['customerSubmitButton'])) {
           <div class="gender-options">
             <p>Gender:</p>
             <label for="">
-              <input type="radio" id="technician-male" name="techGender" value="male" <?php echo isset($_POST['techGender']) && ($_POST['techGender'] == 'male') ? 'checked' : '' ?> />Male
+              <input type="radio" id="technician-male" name="techGender" required value="male" <?php echo isset($_POST['techGender']) && ($_POST['techGender'] == 'male') ? 'checked' : '' ?> />Male
             </label>
             <label for="">
-              <input type="radio" id="technician-female" name="techGender" value="female" <?php echo isset($_POST['techGender']) && ($_POST['techGender'] == 'female') ? 'checked' : '' ?> />Female
+              <input type="radio" id="technician-female" name="techGender" required value="female" <?php echo isset($_POST['techGender']) && ($_POST['techGender'] == 'female') ? 'checked' : '' ?> />Female
             </label>
           </div>
           <div class="input-box">
@@ -323,11 +325,11 @@ if (isset($_POST['customerSubmitButton'])) {
             <label class="errors">
               <?php echo $errors['password']; ?>
             </label>
-            <input type="password" id="technician-password" name="techPassword" placeholder="Password" required />
+            <input type="password" id="technician-password" name="techPassword" placeholder="Password" />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
-            <input type="password" id="technician-confirm-password" name="techConfirmPassword" placeholder="Confirm Password" required />
+            <input type="password" id="technician-confirm-password" name="techConfirmPassword" placeholder="Confirm Password" />
             <i class='bx bxs-lock-alt'></i>
           </div>
           <div class="input-box">
@@ -340,32 +342,31 @@ if (isset($_POST['customerSubmitButton'])) {
             <p>Education Level:</p>
 
             <label for="technician-highSchool">
-              <input type="checkbox" id="technician-highSchool" name="techEducationLevel" value="highSchool" />HighSchool
+              <input type="checkbox" id="technician-highSchool" name="techEducationLevel" required value="highSchool" <?php echo isset($_POST['techEducationLevel']) && ($_POST['techEducationLevel'] == 'highSchool') ? 'selected' : '' ?> />HighSchool
             </label>
 
             <label for="technician-bachelors">
-              <input type="checkbox" id="technician-bachelors" name="techEducationLevel" value="bachelors" />Bachelor's
+              <input type="checkbox" id="technician-bachelors" name="techEducationLevel" required value="bachelors" <?php echo isset($_POST['techEducationLevel']) && ($_POST['techEducationLevel'] == 'bachelors') ? 'selected' : '' ?> />Bachelor's
             </label>
 
             <label for="technician-masters">
-              <input type="checkbox" id="technician-masters" name="techEducationLevel" value="masters" />Master's
+              <input type="checkbox" id="technician-masters" name="techEducationLevel" required value="masters" <?php echo isset($_POST['techEducationLevel']) && ($_POST['techEducationLevel'] == 'masters') ? 'selected' : '' ?> />Master's
             </label>
           </div>
           <div class="input-box">
             <div class="Skill">
 
-              <select type="text" id="technician-skills" name="techSkills" placeholder="Skills" value="<?php echo isset($_POST['custFirstName']) ? htmlspecialchars($_POST['custFirstName']) : ""; ?>">
+              <select type="text" id="technician-skills" name="techSkills" placeholder="Skills" required value="<?php echo isset($_POST['custFirstName']) ? htmlspecialchars($_POST['custFirstName']) : ""; ?>">
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == '') ? 'selected' : '' ?> required value="" disabled selected>Select Skills</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Carpentry') ? 'selected' : '' ?> required value="Carpentry">Carpentry</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Plumbing') ? 'selected' : '' ?> required value="Plumbing">Plumbing</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Electrical') ? 'selected' : '' ?> required value="Electrical">Electrical</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'HVAC Technician') ? 'selected' : '' ?> required value="HVAC Technician">HVAC Technician</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'HVAC') ? 'selected' : '' ?> required value="HVAC">HVAC</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Painting') ? 'selected' : '' ?> required value="Painting">Painting</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Dish Network technician') ? 'selected' : '' ?> required value="Dish Network technician">Dish Network technician</option>
+                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Dish Network') ? 'selected' : '' ?> required value="Dish Network">Dish Network</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Masonry') ? 'selected' : '' ?> required value="Masonry">Masonry</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Cementing') ? 'selected' : '' ?> required value="Cementing">Cementing</option>
                 <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Pest Control') ? 'selected' : '' ?> required value="Pest Control">Pest Control</option>
-                <option <?php echo isset($_POST['techSkills']) && ($_POST['techSkills'] == 'Other') ? 'selected' : '' ?> required value="Other">Other</option>
               </select>
             </div>
           </div>
@@ -380,21 +381,21 @@ if (isset($_POST['customerSubmitButton'])) {
           <div class="file-box">
             <div class="certificate">
               <label for="technician-certificate">Upload Education Certificate (PDF)</label>
-              <input type="file" id="technician-certificate" name="techCertificate" accept="application/pdf" required />
+              <input type="file" id="technician-certificate" name="techCertificate" accept="application/pdf" />
             </div>
           </div>
 
           <div class="file-box">
             <div class="profile">
               <label for="customer-profilePicture">Upload Profile Picture (4x3)</label>
-              <input type="file" id="customer-profilePicture" name="techProfilePicture" accept="image/png, image/jpeg" required />
+              <input type="file" id="customer-profilePicture" name="techProfilePicture" accept="image/png, image/jpeg" />
             </div>
             <div class="ID">
               <label for="technician-id">Upload ID/Passport (PDF)</label>
-              <input type="file" id="technician-certificate" name="techPassport" accept="application/pdf" required />
+              <input type="file" id="technician-certificate" name="techPassport" accept="application/pdf" />
             </div>
           </div>
-          <textarea id="technician-additionalBio" name="techAdditionalBio" placeholder="Additional Bio" value="<?php echo isset($_POST['techAdditionalBio']) ? htmlspecialchars($_POST['techAdditionalBio']) : ""; ?>"></textarea>
+          <textarea id="technician-additionalBio" name="techAdditionalBio" placeholder="Additional Bio" required value="<?php echo isset($_POST['techAdditionalBio']) ? htmlspecialchars($_POST['techAdditionalBio']) : ""; ?>"></textarea>
 
         </div>
         <button type="submit" id="signup" name="technicianSubmitButton">Sign Up</button>
