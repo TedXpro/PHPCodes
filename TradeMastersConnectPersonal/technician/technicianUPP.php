@@ -51,18 +51,37 @@ if (isset($_POST['submit'])) {
     $newUsername = htmlspecialchars($_POST['username']);
     $phone = htmlspecialchars($_POST['phoneNumber']);
 
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+
+      // Get file details
+      $fileName = $_FILES['file']['name'];  // Original filename
+      $fileTmpName = $_FILES['file']['tmp_name'];
+      $fileSize = $_FILES['file']['size'];
+      $fileType = $_FILES['file']['type'];
+
+      // Generate a unique filename with extension
+      $uniqueFileName = $newUsername . "_ProfilePic" . '.' . pathinfo($fileName, PATHINFO_EXTENSION);
+
+      // Define upload directory with subfolder
+      $uploadDir = "TechnicianProfilePics/" . $uniqueFileName;
+      unlink($photoLink);
+      move_uploaded_file($fileTmpName, "../PrePages/" . $uploadDir);
+      $sql = "UPDATE technician SET Photo = '$uploadDir' where UserName = '$oldUsername';";
+      mysqli_query($conn, $sql);
+    }
+
+
     $techSql = "UPDATE technician 
     SET UserName = '$newUsername', `First Name` = '$fname', `Father Name` = '$mname', `Grand Father Name` = '$lname', `Phone Number` = '$phone'
     WHERE UserName = '$oldUsername';";
 
     // $sql = "UPDATE technician_credentials SET UserName = '$newUsername' WHERE UserName = '$oldUsername';";
 
-    if(mysqli_query($conn, $techSql)){
+    if (mysqli_query($conn, $techSql)) {
       header('Location: technicianPP.php'); // redirect to technician home page
-    } else{
+    } else {
       echo 'query error ' . mysqli_error($conn);
     }
-    
   }
 }
 
@@ -82,14 +101,15 @@ if (isset($_POST['submit'])) {
 </head>
 
 <body>
-  <form method="post" action="" enctype="multipart/form-data">
+
+  <form class="technician-form-container" method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" enctype="multipart/form-data">
     <div class="Technician-container">
       <div class="profile">
 
         <img src="<?php echo $photoLink; ?>" alt="profilePIc" id="image">
 
         <div class="rightRound" id="upload">
-          <input type="file" name="fileImg" id="fileImg" accept=".jpg, .jpeg, .png">
+          <input type="file" name="file" id="fileImg" accept=".jpg, .jpeg, .png">
           <i class="fa fa-camera"></i>
         </div>
         <div class="leftRound" id="cancel" style="display: none;">
@@ -102,74 +122,71 @@ if (isset($_POST['submit'])) {
         <div class="paragraph">
           <p id="Technician_UserName"><?php echo $result['First Name'] . $result['Grand Father Name']; ?></p>
           <br>
-          <p id="Technician_skills"><?php echo $skillResult['SkillTitle']; ?></p>
         </div>
 
       </div>
-  </form>
 
-  <form class="technician-form-container" method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-    <div class="technician-form">
-      <div class="add-form">
-        <div class="input-box">
-          <label for="firstName">First Name</label>
-          <input type="text" name="firstName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName']) : htmlspecialchars($result['First Name']); ?>" />
-          <i class='bx bxs-phone'></i>
-        </div>
-        <div class="input-box">
-          <label for="middleName">Middle Name</label>
-          <input type="text" name="middleName" value="<?php echo isset($_POST['middleName']) ? htmlspecialchars($_POST['middleName']) : htmlspecialchars($result['Father Name']); ?>" />
-          <i class='bx bxs-phone'></i>
-        </div>
-        <div class="input-box">
-          <label for="lastName">Last Name</label>
-          <input type="text" name="lastName" value="<?php echo isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName']) : htmlspecialchars($result['Grand Father Name']); ?>" />
-          <i class='bx bxs-phone'></i>
-        </div>
-        <div class="input-box">
-          <label for="username">Username</label>
-          <input type="text" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : htmlspecialchars($result['UserName']); ?>" />
-          <i class='bx bxs-phone'></i>
-        </div>
-        <div class="input-box">
-          <label for="change_phoneNumber">Phone Number</label>
-          <input type="tel" id="change_phoneNumber" name="phoneNumber" value="<?php echo isset($_POST['phoneNumber']) ? htmlspecialchars($_POST['phoneNumber']) : htmlspecialchars($result['Phone Number']); ?>" />
-          <i class='bx bxs-phone'></i>
-        </div>
-        <div class="change_password">
-          <button type="button" id="toggle-password-fields">Change Password</button>
-
-          <div class="modify-pass">
-            <div class="input-box password-field">
-              <label class="errors">
-                <?php echo $errors['password']; ?>
-              </label>
-              <input type="password" id="tecnician-old-password" name="password" placeholder="Old Password" />
-              <i class='bx bxs-lock-alt'></i>
-            </div>
-            <div class="input-box password-field">
-              <label class="errors">
-                <?php
-                echo $errors['passwordsDontMatch'];
-                echo $errors['samePassword'];
-                ?>
-              </label>
-              <input type="password" id="tecnician-new-password" name="NewPassword" placeholder="New Password" />
-              <i class='bx bxs-lock-alt'></i>
-            </div>
-            <div class="input-box password-field">
-
-              <input type="password" id="tecnician-confirm-password" name="confirmPassword" placeholder="Confirm Password" />
-              <i class='bx bxs-lock-alt'></i>
-            </div>
+      <div class="technician-form">
+        <div class="add-form">
+          <div class="input-box">
+            <label for="firstName">First Name</label>
+            <input type="text" name="firstName" value="<?php echo isset($_POST['firstName']) ? htmlspecialchars($_POST['firstName']) : htmlspecialchars($result['First Name']); ?>" />
+            <i class='bx bxs-phone'></i>
           </div>
+          <div class="input-box">
+            <label for="middleName">Middle Name</label>
+            <input type="text" name="middleName" value="<?php echo isset($_POST['middleName']) ? htmlspecialchars($_POST['middleName']) : htmlspecialchars($result['Father Name']); ?>" />
+            <i class='bx bxs-phone'></i>
+          </div>
+          <div class="input-box">
+            <label for="lastName">Last Name</label>
+            <input type="text" name="lastName" value="<?php echo isset($_POST['lastName']) ? htmlspecialchars($_POST['lastName']) : htmlspecialchars($result['Grand Father Name']); ?>" />
+            <i class='bx bxs-phone'></i>
+          </div>
+          <div class="input-box">
+            <label for="username">Username</label>
+            <input type="text" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : htmlspecialchars($result['UserName']); ?>" />
+            <i class='bx bxs-phone'></i>
+          </div>
+          <div class="input-box">
+            <label for="change_phoneNumber">Phone Number</label>
+            <input type="tel" id="change_phoneNumber" name="phoneNumber" value="<?php echo isset($_POST['phoneNumber']) ? htmlspecialchars($_POST['phoneNumber']) : htmlspecialchars($result['Phone Number']); ?>" />
+            <i class='bx bxs-phone'></i>
+          </div>
+          <div class="change_password">
+            <button type="button" id="toggle-password-fields">Change Password</button>
 
-        </div>
-        <div class="button">
-          <button type="submit" id="technician_update" name="submit">Save</button>
+            <div class="modify-pass">
+              <div class="input-box password-field">
+                <label class="errors">
+                  <?php echo $errors['password']; ?>
+                </label>
+                <input type="password" id="tecnician-old-password" name="password" placeholder="Old Password" />
+                <i class='bx bxs-lock-alt'></i>
+              </div>
+              <div class="input-box password-field">
+                <label class="errors">
+                  <?php
+                  echo $errors['passwordsDontMatch'];
+                  echo $errors['samePassword'];
+                  ?>
+                </label>
+                <input type="password" id="tecnician-new-password" name="NewPassword" placeholder="New Password" />
+                <i class='bx bxs-lock-alt'></i>
+              </div>
+              <div class="input-box password-field">
+
+                <input type="password" id="tecnician-confirm-password" name="confirmPassword" placeholder="Confirm Password" />
+                <i class='bx bxs-lock-alt'></i>
+              </div>
+            </div>
+
+          </div>
+          <div class="button">
+            <button type="submit" id="technician_update" name="submit">Save</button>
+          </div>
         </div>
       </div>
-    </div>
 
   </form>
 
