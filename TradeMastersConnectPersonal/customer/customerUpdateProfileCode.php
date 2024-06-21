@@ -16,7 +16,4 @@ $result = mysqli_fetch_assoc($result);
 
 $photoLink = "../PrePages/" . $result['Photo Link'];
 
-// $skilSql = "SELECT * FROM technician_skill where TechUserName = '$username';";
-// $skillResult = mysqli_query($conn, $skilSql);
-// $skillResult = mysqli_fetch_assoc($skillResult);
 ?>
